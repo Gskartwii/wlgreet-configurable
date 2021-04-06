@@ -23,7 +23,7 @@ fn main() {
 
     let (tx_draw, rx_draw) = channel();
     let mut app = App::new(tx_draw, config.clone());
-    app.set_widget(widgets::login::Login::new(config.command))
+    app.set_widget(widgets::login::Login::new(config.command, config.border, config.text_color, config.question))
         .unwrap();
 
     let (mut rx_pipe, mut tx_pipe) = pipe().unwrap();

@@ -27,6 +27,15 @@ fn default_background() -> Color {
 fn default_cmd() -> String {
     "".to_string()
 }
+fn default_border() -> Color {
+    Color::new(1.0, 1.0, 1.0, 1.0)
+}
+fn default_text_color() -> Color {
+    Color::new(1.0, 1.0, 1.0, 1.0)
+}
+fn default_question() -> String {
+    "Login".to_string()
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -39,6 +48,12 @@ pub struct Config {
     pub background: Color,
     #[serde(default = "default_cmd")]
     pub command: String,
+    #[serde(default = "default_border")]
+    pub border: Color,
+    #[serde(default = "default_text_color")]
+    pub text_color: Color,
+    #[serde(default = "default_question")]
+    pub question: String,
 }
 
 impl Default for Config {
@@ -48,6 +63,9 @@ impl Default for Config {
             scale: 1,
             background: Color::new(0.0, 0.0, 0.0, 0.9),
             command: "".to_string(),
+            border: Color::new(1.0, 1.0, 1.0, 1.0),
+            text_color: Color::new(1.0, 1.0, 1.0, 1.0),
+            question: "Login".to_string(),
         }
     }
 }

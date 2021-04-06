@@ -1,5 +1,5 @@
 use crate::color::Color;
-use crate::draw::{draw_box, Font, DEJAVUSANS_MONO};
+use crate::draw::{draw_box, Font, FONT};
 use crate::widget::{DrawContext, DrawReport, KeyState, ModifiersState, Widget};
 
 use std::env;
@@ -43,34 +43,38 @@ pub struct Login {
     mode: Option<AuthMessageType>,
     error: String,
     border: Color,
+    text_color: Color,
     headline_font: Font,
     prompt_font: Font,
     dirty: bool,
     reset_border: bool,
     stream: Option<UnixStream>,
+    default_question: String,
 }
 
 impl Login {
-    pub fn new(cmd: String) -> Box<Login> {
+    pub fn new(cmd: String, border: Color, text_color: Color, question: String) -> Box<Login> {
         let mut l = Login {
             question: String::new(),
             answer: String::new(),
             command: cmd,
             mode: None,
             error: "".to_string(),
-            headline_font: Font::new(&DEJAVUSANS_MONO, 72.0),
-            prompt_font: Font::new(&DEJAVUSANS_MONO, 32.0),
-            border: Color::new(1.0, 1.0, 1.0, 1.0),
+            headline_font: Font::new(&FONT, 72.0),
+            prompt_font: Font::new(&FONT, 32.0),
             dirty: false,
             reset_border: false,
             stream: None,
+            default_question: question,
+            border,
+            text_color,
         };
         l.reset();
         Box::new(l)
     }
 
     fn reset(&mut self) {
-        self.question = "username:".to_string();
+        self.question = self.default_question.clone();
         self.answer = String::new();
     }
 
@@ -138,7 +142,7 @@ impl Login {
                         error_type,
                         description,
                     } => match error_type {
-                        ErrorType::AuthError => return Err("Login failed".into()),
+                        ErrorType::AuthError => return Err("⚠ Rejected ⚠".into()),
                         ErrorType::Error => {
                             eprintln!("err: {}", description);
                             std::process::exit(-1);
@@ -151,7 +155,7 @@ impl Login {
                 error_type,
                 description,
             } => match error_type {
-                ErrorType::AuthError => return Err("Login failed".into()),
+                ErrorType::AuthError => return Err("⚠ Rejected ⚠".into()),
                 ErrorType::Error => {
                     eprintln!("err: {}", description);
                     std::process::exit(-1);
@@ -184,14 +188,14 @@ impl Widget for Login {
         self.headline_font.auto_draw_text(
             &mut buf.offset((32, 24))?,
             &ctx.bg,
-            &Color::new(1.0, 1.0, 1.0, 1.0),
+            &self.text_color,
             "Login",
         )?;
 
         let (w, _) = self.prompt_font.auto_draw_text(
             &mut buf.offset((256, 24))?,
             &ctx.bg,
-            &Color::new(1.0, 1.0, 1.0, 1.0),
+            &self.text_color,
             &self.question,
         )?;
 
@@ -200,7 +204,7 @@ impl Widget for Login {
                 self.prompt_font.auto_draw_text(
                     &mut buf.subdimensions((256 + w + 16, 24, width - 416 - 32, 64))?,
                     &ctx.bg,
-                    &Color::new(1.0, 1.0, 1.0, 1.0),
+                    &self.text_color,
                     &format!("{}", self.answer),
                 )?;
             }
@@ -212,7 +216,7 @@ impl Widget for Login {
                 self.prompt_font.auto_draw_text(
                     &mut buf.subdimensions((256 + w + 16, 24, width - 416 - 32, 64))?,
                     &ctx.bg,
-                    &Color::new(1.0, 1.0, 1.0, 1.0),
+                    &self.text_color,
                     &stars,
                 )?;
             }
@@ -223,7 +227,7 @@ impl Widget for Login {
             self.prompt_font.auto_draw_text(
                 &mut buf.offset((256, 64))?,
                 &ctx.bg,
-                &Color::new(1.0, 1.0, 1.0, 1.0),
+                &self.text_color,
                 &self.error,
             )?;
         }
